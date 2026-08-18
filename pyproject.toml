@@ -1,0 +1,11 @@
+[project]
+name = "attack-orchestrator"
+version = "0.1.0"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = [
+    "integration: spawns the real C device simulator as a subprocess over TCP",
+]
