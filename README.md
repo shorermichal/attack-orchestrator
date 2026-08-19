@@ -50,9 +50,10 @@ and decides whether to try again.
 luck, the other is infrastructure breaking. They're reported separately, so
 the simulator's ability to drop mid-chain (Part 2) fits naturally instead of being conflated with "the exploit didn't work."
 
-**Extraction only works through a completed session.** `Extractor` needs a
-`DeviceSession`, and the only way to get one is a fully successful attack
-run - enforced by the type, not by convention. "Extract everything" means a
+**Extraction only works through a completed session.** `Extractor` operates
+on a `DeviceSession`. In the normal orchestration flow, a session is
+returned only after every stage of an attack succeeds - `Orchestrator.run()`
+is the only code path that builds one. "Extract everything" means a
 checklist of known file paths, since the device only ever offers "read this
 one path," never "list what's here."
 
@@ -72,10 +73,10 @@ byte-exact.
 
 The **server** rolls the dice for each stage, not the client - on a real
 device, whether an exploit lands is the device's behavior, not something
-the attacker's laptop gets to decide. It also enforces the lock itself:
-`READ` only succeeds once the server has personally seen a stage marked
-`is_last` succeed, so the client's claim of "I finished the chain" is never
-just taken on faith. Connection drops are triggered deterministically
+the attacker's laptop gets to decide. The server also determines stage
+success itself and maintains its own locked/unlocked state: `READ` is
+rejected until a stage marked `is_last` succeeds. Connection drops are
+triggered deterministically
 (`--drop-on-stage NAME`, so tests are repeatable, not flaky) and surface to
 the framework as a distinct `DeviceConnectionError` rather than a failed
 stage.
