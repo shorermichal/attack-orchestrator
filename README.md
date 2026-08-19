@@ -88,5 +88,9 @@ stage.
 ```
 
 `test_selection.py`, `test_orchestrator.py`, and `test_extraction.py` are
-fast unit tests against an in-memory fake device. `test_simulator_integration.py`
-runs the same framework against the real, compiled `device_simulator` binary over a real socket (`tests/conftest.py` builds and launches it) - covering the full unlock-then-read path, the lock actually being enforced by the server rather than the orchestrator, a dropped connection mid-chain, and a byte-exact read through embedded newlines.
+fast unit tests against an in-memory fake device. `test_integration.py`
+runs the same framework against the real, compiled `device_simulator` binary
+over a real socket (it builds and launches it via a `simulator` fixture) -
+covering the full unlock-then-read path, the lock actually being enforced by
+the server rather than the orchestrator, a dropped connection mid-chain, and
+a byte-exact read through embedded newlines.

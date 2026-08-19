@@ -1,8 +1,15 @@
 from .attack import Attack, Requirements, Stage, parse_ios_version
-from .device import Device, DeviceConnectionError, DeviceInfo, DeviceSession, InMemoryDevice, StageOutcome
+from .device import (
+    Device,
+    DeviceConnectionError,
+    DeviceInfo,
+    DeviceSession,
+    InMemoryDevice,
+    RemoteDevice,
+    StageOutcome,
+)
 from .extraction import DEFAULT_MANIFEST, ExtractionReport, Extractor
 from .orchestrator import AttackRunResult, NoViableAttackError, Orchestrator, StageRecord
-from .remote_device import RemoteDevice
 from .selection import AttackSelector, BestOddsSelector
 
 __all__ = [
