@@ -17,7 +17,6 @@ _CLI_FLAGS = {
     "ios_version": "--ios-version",
     "battery": "--battery",
     "seed": "--seed",
-    "drop_rate": "--drop-rate",
     "drop_on_stage": "--drop-on-stage",
 }
 

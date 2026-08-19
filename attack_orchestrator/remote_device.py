@@ -3,9 +3,8 @@ from __future__ import annotations
 import socket
 from typing import Any
 
-from .device import Device, DeviceInfo, StageOutcome
-from .exceptions import DeviceConnectionError
-from .stage import Stage
+from .attack import Stage
+from .device import Device, DeviceConnectionError, DeviceInfo, StageOutcome
 
 _ENCODING = "utf-8"
 
@@ -75,9 +74,7 @@ class RemoteDevice(Device):
             jailbroken=jailbroken == "1",
         )
 
-    def execute_stage(
-        self, attack_id: str, stage: Stage, is_last_stage: bool, context: dict[str, Any]
-    ) -> StageOutcome:
+    def execute_stage(self, attack_id: str, stage: Stage, is_last_stage: bool) -> StageOutcome:
         self._send_line(f"STAGE {stage.name} {stage.success_probability} {int(is_last_stage)}")
         line = self._recv_line()
         if line == "SUCCESS":

@@ -31,7 +31,6 @@ typedef struct {
     int jailbroken;
     int port;
     unsigned int seed;
-    double drop_rate;
     const char *drop_on_stage;
     vfile_t files[MAX_FILES];
     size_t file_count;
@@ -93,9 +92,8 @@ static void print_usage(const char *prog) {
             "  --battery N           reported battery percent (default 80)\n"
             "  --jailbroken          report the device as already jailbroken\n"
             "  --seed N              RNG seed (default: time-based)\n"
-            "  --drop-rate F         probability [0,1] of dropping the connection\n"
-            "                        instead of responding to a STAGE command\n"
-            "  --drop-on-stage NAME  always drop the connection on a STAGE command\n"
+            "  --drop-on-stage NAME  drop the connection instead of responding to a\n"
+            "                        STAGE command with this exact name\n"
             "                        with this exact name (deterministic, for tests)\n"
             "  --file PATH=CONTENT   add/override a readable file (repeatable)\n"
             "  -h, --help             show this help\n",
@@ -110,7 +108,6 @@ static int parse_args(int argc, char **argv, config_t *cfg) {
     cfg->jailbroken = 0;
     cfg->port = 9999;
     cfg->seed = (unsigned int)time(NULL);
-    cfg->drop_rate = 0.0;
     cfg->drop_on_stage = NULL;
     cfg->file_count = 0;
     set_default_files(cfg);
@@ -130,8 +127,6 @@ static int parse_args(int argc, char **argv, config_t *cfg) {
             cfg->jailbroken = 1;
         } else if (strcmp(argv[i], "--seed") == 0 && i + 1 < argc) {
             cfg->seed = (unsigned int)strtoul(argv[++i], NULL, 10);
-        } else if (strcmp(argv[i], "--drop-rate") == 0 && i + 1 < argc) {
-            cfg->drop_rate = atof(argv[++i]);
         } else if (strcmp(argv[i], "--drop-on-stage") == 0 && i + 1 < argc) {
             cfg->drop_on_stage = argv[++i];
         } else if (strcmp(argv[i], "--file") == 0 && i + 1 < argc) {
@@ -189,12 +184,7 @@ static int handle_info(int fd, config_t *cfg) {
  * the connection instead - simulating a device that dies or loses its link
  * mid-attack. */
 static int should_drop(config_t *cfg, const char *stage_name) {
-    if (cfg->drop_on_stage && strcmp(stage_name, cfg->drop_on_stage) == 0) return 1;
-    if (cfg->drop_rate > 0.0) {
-        double roll = (double)rand() / ((double)RAND_MAX + 1.0);
-        if (roll < cfg->drop_rate) return 1;
-    }
-    return 0;
+    return cfg->drop_on_stage && strcmp(stage_name, cfg->drop_on_stage) == 0;
 }
 
 /* STAGE <name> <probability> <is_last:0/1>

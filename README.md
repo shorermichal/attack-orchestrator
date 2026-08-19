@@ -18,8 +18,7 @@ python3 -m venv .venv
 ## How it works
 
 1. Given a device (model, iOS version, battery, ...) and a list of attacks,
-   a **selector** filters out attacks that don't fit, then picks the best of
-   what's left.
+   a **selector** filters out attacks that don't fit, then picks the best of what's left.
 2. An **orchestrator** runs the chosen attack's **stages** one at a time.
    Each stage can succeed or fail; the first failure stops the chain.
 3. If every stage succeeds, the orchestrator returns a **session** - the
@@ -49,8 +48,7 @@ and decides whether to try again.
 
 **A dropped connection is not the same as a failed stage.** One is bad
 luck, the other is infrastructure breaking. They're reported separately, so
-the simulator's ability to drop mid-chain (Part 2) fits naturally instead of
-being conflated with "the exploit didn't work."
+the simulator's ability to drop mid-chain (Part 2) fits naturally instead of being conflated with "the exploit didn't work."
 
 **Extraction only works through a completed session.** `Extractor` needs a
 `DeviceSession`, and the only way to get one is a fully successful attack
@@ -77,10 +75,10 @@ device, whether an exploit lands is the device's behavior, not something
 the attacker's laptop gets to decide. It also enforces the lock itself:
 `READ` only succeeds once the server has personally seen a stage marked
 `is_last` succeed, so the client's claim of "I finished the chain" is never
-just taken on faith. Connection drops can be triggered deterministically
-(`--drop-on-stage NAME`, for repeatable tests) or at random (`--drop-rate`,
-for realism), and surface to the framework as a distinct
-`DeviceConnectionError` rather than a failed stage.
+just taken on faith. Connection drops are triggered deterministically
+(`--drop-on-stage NAME`, so tests are repeatable, not flaky) and surface to
+the framework as a distinct `DeviceConnectionError` rather than a failed
+stage.
 
 ## Tests (Part 3)
 
@@ -91,8 +89,4 @@ for realism), and surface to the framework as a distinct
 
 `test_selection.py`, `test_orchestrator.py`, and `test_extraction.py` are
 fast unit tests against an in-memory fake device. `test_simulator_integration.py`
-runs the same framework against the real, compiled `device_simulator` binary
-over a real socket (`tests/conftest.py` builds and launches it) - covering
-the full unlock-then-read path, the lock actually being enforced by the
-server rather than the orchestrator, a dropped connection mid-chain, and a
-byte-exact read through embedded newlines.
+runs the same framework against the real, compiled `device_simulator` binary over a real socket (`tests/conftest.py` builds and launches it) - covering the full unlock-then-read path, the lock actually being enforced by the server rather than the orchestrator, a dropped connection mid-chain, and a byte-exact read through embedded newlines.

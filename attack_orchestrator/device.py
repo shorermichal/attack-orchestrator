@@ -4,9 +4,14 @@ import random
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from .stage import Stage
+if TYPE_CHECKING:
+    # Stage lives in attack.py, which itself imports DeviceInfo from this
+    # module - importing it for real here would be circular. It's only ever
+    # used in type annotations (which `from __future__ import annotations`
+    # keeps lazy), so a type-checking-only import is enough.
+    from .attack import Stage
 
 
 @dataclass(frozen=True)
@@ -31,6 +36,15 @@ class StageOutcome(Enum):
     FAILURE = "failure"
 
 
+class DeviceConnectionError(Exception):
+    """Raised when the connection to a device is lost or unusable.
+
+    Distinct from a stage failing: a stage failure is an expected outcome the
+    framework models (bad odds), while a connection error is an infrastructure
+    fault (e.g. a dropped TCP connection to the device simulator).
+    """
+
+
 class Device(ABC):
     """Everything the framework needs from a device, real or simulated.
 
@@ -45,19 +59,13 @@ class Device(ABC):
         """Query current device state (used for attack selection)."""
 
     @abstractmethod
-    def execute_stage(
-        self, attack_id: str, stage: Stage, is_last_stage: bool, context: dict[str, Any]
-    ) -> StageOutcome:
+    def execute_stage(self, attack_id: str, stage: Stage, is_last_stage: bool) -> StageOutcome:
         """Run one stage of an attack chain.
 
         `is_last_stage` tells the device whether this is the final stage of
         the chain, so a real device (or the simulator) can decide when to
         actually grant file access, rather than trusting the caller's word
         for it after the fact.
-
-        `context` is a mutable scratch dict shared across all stages of a
-        single attack run, so a stage can leave behind state a later stage
-        depends on (e.g. a token obtained during an earlier step).
 
         Implementations should raise DeviceConnectionError for
         infrastructure failures (e.g. a dropped socket) rather than
@@ -114,9 +122,7 @@ class InMemoryDevice(Device):
     def get_info(self) -> DeviceInfo:
         return self._info
 
-    def execute_stage(
-        self, attack_id: str, stage: Stage, is_last_stage: bool, context: dict[str, Any]
-    ) -> StageOutcome:
+    def execute_stage(self, attack_id: str, stage: Stage, is_last_stage: bool) -> StageOutcome:
         roll = self._rng.random()
         return StageOutcome.SUCCESS if roll < stage.success_probability else StageOutcome.FAILURE
 

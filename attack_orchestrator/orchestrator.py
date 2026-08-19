@@ -3,11 +3,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Sequence
 
-from .attack import Attack
-from .device import Device, DeviceSession, StageOutcome
-from .exceptions import DeviceConnectionError, NoViableAttackError
+from .attack import Attack, Stage
+from .device import Device, DeviceConnectionError, DeviceSession, StageOutcome
 from .selection import AttackSelector
-from .stage import Stage
+
+
+class NoViableAttackError(Exception):
+    """Raised when no registered attack's requirements match the target device."""
 
 
 @dataclass
@@ -50,12 +52,11 @@ class Orchestrator:
                 f"battery={info.battery_percent}, jailbroken={info.jailbroken})"
             )
 
-        context: dict = {}
         records: list[StageRecord] = []
         last_index = len(attack.stages) - 1
         for index, stage in enumerate(attack.stages):
             try:
-                outcome = device.execute_stage(attack.attack_id, stage, index == last_index, context)
+                outcome = device.execute_stage(attack.attack_id, stage, index == last_index)
             except DeviceConnectionError as exc:
                 return AttackRunResult(
                     attack=attack,

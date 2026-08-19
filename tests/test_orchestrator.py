@@ -77,7 +77,7 @@ class _DropsConnectionDevice(Device):
     def get_info(self) -> DeviceInfo:
         return self._info
 
-    def execute_stage(self, attack_id, stage, is_last_stage, context) -> StageOutcome:
+    def execute_stage(self, attack_id, stage, is_last_stage) -> StageOutcome:
         if stage.name == self._fail_on_stage:
             raise DeviceConnectionError("socket closed by peer")
         return StageOutcome.SUCCESS
